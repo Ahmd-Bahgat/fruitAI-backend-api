@@ -1,6 +1,6 @@
 import { UserModel } from "../models/userModel";
 import { AppError } from "../utils/appError";
-import { IUser } from "../validations/userValidate";
+import { ILogin, IUser } from "../validations/userValidate";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -26,6 +26,23 @@ export const register = async (data: IUser) => {
   };
 };
 
+export const login = async ({email, password}: ILogin) => {
+  const user = await UserModel.findOne({email})
+  if(!user){
+    throw new AppError('Incorrect email or password', 400)
+  }
+  const isMatch = await bcrypt.compare(password, user.password)
+  if(!isMatch){
+    throw new AppError('Incorrect email or password', 400)
+  }
+  return{
+    token : generateJWT(user._id.toString()),
+    user: {
+      name: user.name,
+      email : user.email
+    }
+  }
+};
 
 const generateJWT = (userId: string): string => {
   if (!process.env.SECRET_KEY) {
