@@ -13,7 +13,9 @@ const errorHandler = (
   res.status(error.statusCode).json({
     status: error.status,
     message: error.isOperational ? error.message : 'Something went wrong',
-    stack: process.env.NODE_DEV === 'development' ? error.stack : undefined,
+    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     isOperational: error.isOperational,
   });
 };
+
+export default errorHandler
