@@ -1,5 +1,4 @@
-import mongoose, { Schema, Types } from "mongoose";
-import { string } from "zod";
+import mongoose, { Schema } from "mongoose";
 import { IUser } from "../validations/userValidate";
 
 const userSchema = new Schema<IUser>(
@@ -30,4 +29,4 @@ const userSchema = new Schema<IUser>(
   { timestamps: true },
 );
 
-export const UserModel = mongoose.model<IUser>('User', userSchema)
+export const UserModel = mongoose.model<IUser>("User", userSchema);

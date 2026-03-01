@@ -1,10 +1,30 @@
-import express from 'express'
-import asyncHandler from '../utils/asyncHandler'
-import { loginController, registerController } from '../controllers/userController'
+import express from "express";
 
-const router = express.Router()
+import asyncHandler from "../utils/asyncHandler";
+import {
+  loginController,
+  registerController,
+  updateUserProfileController,
+  updateUserProfileImageController,
+} from "../controllers/userController";
+import validateJWT from "../middlewares/validateJWT";
+import { uploadSingleImage } from "../middlewares/uploadMiddleware";
 
-router.post('/register', asyncHandler(registerController))
-router.post('/login', asyncHandler(loginController))
+const router = express.Router();
 
-export default router
+router.post("/auth/register", asyncHandler(registerController));
+router.post("/auth/login", asyncHandler(loginController));
+
+router.patch(
+  "/user/profile",
+  validateJWT,
+  asyncHandler(updateUserProfileController),
+);
+router.patch(
+  "/user/profile-image",
+  validateJWT,
+  uploadSingleImage('profileImage'),
+  updateUserProfileImageController,
+);
+
+export default router;
