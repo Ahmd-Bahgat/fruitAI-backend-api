@@ -10,19 +10,7 @@ if (!fs.existsSync(uploadPath)) {
 }
 
 export const uploadSingleImage = (filedName: string) => {
-  const storage = multer.diskStorage({
-    destination(req, file, cb) {
-      cb(null, uploadPath);
-    },
-    filename(req, file, cb) {
-      const ext = path.extname(file.originalname);
-      if (!req.userId) {
-        return cb(new AppError("Unauthorized", 401), "");
-      }
-      const uniqueName = `profile-image-${req.userId}-${Date.now()}${ext}`;
-      cb(null, uniqueName);
-    },
-  });
+  const storage = multer.memoryStorage();
 
   const filter = (
     req: Request,
@@ -32,7 +20,7 @@ export const uploadSingleImage = (filedName: string) => {
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
-      cb(new AppError("Only image allowed", 400));
+      cb(new AppError("Only image files allowed", 400));
     }
   };
 

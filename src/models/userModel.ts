@@ -1,3 +1,4 @@
+import path from "path";
 import mongoose, { Schema } from "mongoose";
 import { IUser } from "../validations/userValidate";
 
@@ -28,5 +29,14 @@ const userSchema = new Schema<IUser>(
   },
   { timestamps: true },
 );
+
+userSchema.virtual("profileImageUrl").get(function () {
+  if (!this.profileImage) {
+    return null;
+  }
+  return `${process.env.BASE_URL}users/${this.profileImage}`;
+});
+userSchema.set("toJSON", { virtuals: true });
+userSchema.set("toObject", { virtuals: true });
 
 export const UserModel = mongoose.model<IUser>("User", userSchema);

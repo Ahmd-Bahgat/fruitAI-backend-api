@@ -80,8 +80,8 @@ export const updateUserProfileImageService = async (
   }
   if (user.profileImage) {
     const oldImageFullPath = path.join(
-      process.cwd(),
-      user.profileImage.replace(/^\//, ""),
+      process.cwd(),'/uploads/users/',
+      user.profileImage,
     );
     if (fs.existsSync(oldImageFullPath)) {
       fs.unlinkSync(oldImageFullPath);

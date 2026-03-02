@@ -1,25 +1,26 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import connectDB from './configs/db'
-import userRoute from './routes/userRoute'
-import errorHandler from './middlewares/errorHandler'
-dotenv.config()
+import express from "express";
+import dotenv from "dotenv";
 
-connectDB()
+import connectDB from "./configs/db";
+import userRoute from "./routes/userRoute";
+import errorHandler from "./middlewares/errorHandler";
+import { notFound } from "./middlewares/notFound";
 
-const app = express()
-const port = process.env.PORT
+dotenv.config();
 
-app.use(express.json())
-app.use(express.static('uploads'))
+connectDB();
 
-app.use('/api', userRoute)
+const app = express();
+const port = process.env.PORT;
 
-//middleware
+app.use(express.json());
+app.use(express.static("uploads"));
 
-app.use(errorHandler)
+app.use("/api", userRoute);
 
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(port, () => {
-    console.log(`server running on 0.0.0.0:${port}`)
-})
+  console.log(`server running on 0.0.0.0:${port}`);
+});

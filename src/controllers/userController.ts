@@ -1,4 +1,7 @@
+import path from "path";
 import { Request, Response } from "express";
+
+import sharp from "sharp";
 
 import { loginInput, zUserSchema } from "../validations/userValidate";
 import { AppError } from "../utils/appError";
@@ -9,10 +12,8 @@ import {
   updateUserProfileImageService,
 } from "../services/userService";
 
-
 export const registerController = async (req: Request, res: Response) => {
   const parsed = zUserSchema.safeParse(req.body);
-  console.log(parsed.data);
   if (!parsed.success) {
     throw new AppError("Registration data in invalid", 400);
   }
@@ -60,15 +61,22 @@ export const updateUserProfileImageController = async (
   req: Request,
   res: Response,
 ) => {
-  const userId = req.userId
-  if(!req.file){
-    throw new AppError('No image uploaded', 400)
+  const userId = req.userId;
+  if (!req.file) {
+    throw new AppError("No image uploaded", 400);
   }
-  const imagePath = `/uploads/users/${req.file.filename}`
-  const data = await updateUserProfileImageService(userId as string, imagePath)
+  const ext = path.extname(req.file.originalname);
+  const fileName = `profile-image-${req.userId}-${Date.now()}${ext}`;
+  const filePath = path.join(process.cwd(), "uploads/users/", fileName);
+
+  await sharp(req.file.buffer)
+    .resize(800, 800, { fit: "inside", withoutEnlargement: true})
+    .toFile(filePath);
+
+  const data = await updateUserProfileImageService(userId as string, fileName);
   res.status(200).json({
-    status: 'success',
-    message: 'Profile image updated successfully',
-    data
-  })
+    status: "success",
+    message: "Profile image updated successfully",
+    data,
+  });
 };
