@@ -5,16 +5,19 @@ import connectDB from "./configs/db";
 import userRoute from "./routes/userRoute";
 import errorHandler from "./middlewares/errorHandler";
 import { notFound } from "./middlewares/notFound";
+import { connectRedis } from "./configs/redis";
 
 dotenv.config();
 
 connectDB();
+connectRedis()
 
 const app = express();
 const port = process.env.PORT;
 
 app.use(express.json());
 app.use(express.static("uploads"));
+
 
 app.use("/api", userRoute);
 

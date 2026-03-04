@@ -1,8 +1,9 @@
 import fs from "fs";
-import multer, { FileFilterCallback } from "multer";
-import path from "path";
-import { AppError } from "../utils/appError";
+
 import { Request } from "express";
+import multer, { FileFilterCallback } from "multer";
+
+import { AppError } from "../utils/appError";
 
 const uploadPath = "uploads/users";
 if (!fs.existsSync(uploadPath)) {

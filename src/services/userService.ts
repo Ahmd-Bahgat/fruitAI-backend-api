@@ -3,6 +3,8 @@ import fs from "fs";
 
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
+import { client } from "../configs/redis";
 
 import { UserModel } from "../models/userModel";
 import { AppError } from "../utils/appError";
@@ -48,6 +50,45 @@ export const loginService = async ({ email, password }: ILogin) => {
   };
 };
 
+export const forgotPasswordService = async (email: string) => {
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    throw new AppError("Email not found", 400);
+  }
+  const otpCode = crypto.randomInt(100000, 999999).toString();
+  const hashedOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
+
+  await client.set(`otp:reset:${email}`, hashedOtp, { EX: 300 });
+
+  return otpCode;
+};
+
+export const resetPasswordService = async ({
+  email,
+  otpCode,
+  newPassword,
+}: any) => {
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  const hashedOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
+  const redisOtp = await client.get(`otp:reset:${email}`);
+  if (!redisOtp) {
+    throw new AppError("Expired OTP", 400);
+  }
+  if (hashedOtp !== redisOtp) {
+    throw new AppError("Invalid OTP", 400);
+  }
+
+  client.del(`otp:reset:${email}`);
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+  user.password = hashedPassword;
+
+  await user.save();
+};
+
 export const updateUserProfileService = async ({
   userId,
   name,
@@ -80,7 +121,8 @@ export const updateUserProfileImageService = async (
   }
   if (user.profileImage) {
     const oldImageFullPath = path.join(
-      process.cwd(),'/uploads/users/',
+      process.cwd(),
+      "/uploads/users/",
       user.profileImage,
     );
     if (fs.existsSync(oldImageFullPath)) {

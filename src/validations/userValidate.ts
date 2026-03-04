@@ -8,6 +8,8 @@ export const zUserSchema = z.object({
     .min(6, "Password must be at least 6 characters")
     .max(225),
   profileImage: z.string().optional(),
+  otpCode: z.string().optional(),
+  otpExpires: z.date().optional()
 });
 
 export type IUser = z.infer<typeof zUserSchema>;

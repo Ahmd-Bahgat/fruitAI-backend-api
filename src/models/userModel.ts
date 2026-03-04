@@ -26,6 +26,8 @@ const userSchema = new Schema<IUser>(
       maxlength: 225,
     },
     profileImage: String,
+    otpCode: String,
+    otpExpires: Date
   },
   { timestamps: true },
 );
