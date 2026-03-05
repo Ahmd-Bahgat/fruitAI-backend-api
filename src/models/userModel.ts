@@ -1,4 +1,3 @@
-import path from "path";
 import mongoose, { Schema } from "mongoose";
 import { IUser } from "../validations/userValidate";
 
@@ -26,8 +25,6 @@ const userSchema = new Schema<IUser>(
       maxlength: 225,
     },
     profileImage: String,
-    otpCode: String,
-    otpExpires: Date
   },
   { timestamps: true },
 );

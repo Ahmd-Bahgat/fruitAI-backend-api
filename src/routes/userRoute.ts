@@ -12,13 +12,22 @@ import {
   updateUserProfileController,
   updateUserProfileImageController,
 } from "../controllers/userController";
+import { rateLimit } from "../middlewares/rateLimit";
 
 const router = express.Router();
 
 router.post("/auth/register", asyncHandler(registerController));
 router.post("/auth/login", asyncHandler(loginController));
-router.post("/auth/forgot-password", asyncHandler(forgotPasswordController));
-router.post("/auth/reset-password", asyncHandler(resetPasswordController));
+router.post(
+  "/auth/forgot-password",
+  rateLimit(3, 300),
+  asyncHandler(forgotPasswordController),
+);
+router.post(
+  "/auth/reset-password",
+  rateLimit(3, 300),
+  asyncHandler(resetPasswordController),
+);
 
 router.patch(
   "/user/profile",
@@ -31,6 +40,5 @@ router.patch(
   uploadSingleImage("profileImage"),
   asyncHandler(updateUserProfileImageController),
 );
-
 
 export default router;

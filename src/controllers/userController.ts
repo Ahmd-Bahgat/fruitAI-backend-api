@@ -3,8 +3,11 @@ import path from "path";
 import { Request, Response } from "express";
 import sharp from "sharp";
 
-
-import { loginInput, zUserSchema } from "../validations/userValidate";
+import {
+  loginInput,
+  zResetPassword,
+  zUserSchema,
+} from "../validations/userValidate";
 import { AppError } from "../utils/appError";
 import {
   loginService,
@@ -41,11 +44,12 @@ export const loginController = async (req: Request, res: Response) => {
 };
 
 export const forgotPasswordController = async (req: Request, res: Response) => {
+  const IP = req.ip;
   const { email } = req.body;
   if (!email) {
     throw new AppError("Email is required", 400);
   }
-  const otpCode = await forgotPasswordService(email);
+  const otpCode = await forgotPasswordService(email, IP);
 
   await sendEmail({
     to: email,
@@ -59,11 +63,14 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
 };
 
 export const resetPasswordController = async (req: Request, res: Response) => {
-  const { email, otpCode, newPassword } = req.body;
-  if (!email || !otpCode || !newPassword) {
+  const IP = req.ip;
+  const parsed = zResetPassword.safeParse(req.body);
+
+  if (!parsed.success) {
     throw new AppError("Invalid input data", 400);
   }
-  await resetPasswordService({ email, otpCode, newPassword });
+
+  await resetPasswordService(parsed.data, IP);
   res.status(200).json({
     status: "success",
     message: "Password updated successfully",

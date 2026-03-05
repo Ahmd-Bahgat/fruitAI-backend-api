@@ -50,42 +50,45 @@ export const loginService = async ({ email, password }: ILogin) => {
   };
 };
 
-export const forgotPasswordService = async (email: string) => {
+export const forgotPasswordService = async (email: string, IP: any) => {
   const user = await UserModel.findOne({ email });
   if (!user) {
     throw new AppError("Email not found", 400);
   }
+
   const otpCode = crypto.randomInt(100000, 999999).toString();
   const hashedOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
 
-  await client.set(`otp:reset:${email}`, hashedOtp, { EX: 300 });
+  await client.set(`otp:reset:${IP}:${email}`, hashedOtp, { EX: 300 });
 
   return otpCode;
 };
 
-export const resetPasswordService = async ({
-  email,
-  otpCode,
-  newPassword,
-}: any) => {
+export const resetPasswordService = async (
+  { email, otpCode, newPassword }: any,
+  IP: any,
+) => {
   const user = await UserModel.findOne({ email });
+
   if (!user) {
     throw new AppError("User not found", 404);
   }
+
   const hashedOtp = crypto.createHash("sha256").update(otpCode).digest("hex");
-  const redisOtp = await client.get(`otp:reset:${email}`);
+  const redisOtp = await client.get(`otp:reset:${IP}:${email}`);
+
   if (!redisOtp) {
     throw new AppError("Expired OTP", 400);
   }
+
   if (hashedOtp !== redisOtp) {
     throw new AppError("Invalid OTP", 400);
   }
 
-  client.del(`otp:reset:${email}`);
-
   const hashedPassword = await bcrypt.hash(newPassword, 12);
-  user.password = hashedPassword;
 
+  user.password = hashedPassword;
+  await client.del(`otp:reset:${IP}:${email}`);
   await user.save();
 };
 
