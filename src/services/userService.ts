@@ -33,10 +33,11 @@ export const registerService = async (data: IUser) => {
 };
 
 export const loginService = async ({ email, password }: ILogin) => {
-  const user = await UserModel.findOne({ email });
+  const user = await UserModel.findOne({ email }).select("+password");
   if (!user) {
     throw new AppError("Incorrect email or password", 400);
   }
+  console.log(user.password);
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     throw new AppError("Incorrect email or password", 400);
@@ -135,6 +136,42 @@ export const updateUserProfileImageService = async (
   user.profileImage = newImagePath;
   await user.save();
   return user;
+};
+
+export const getMeService = async (userId: string) => {
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  return user;
+};
+
+export const getUsersService = async (query: any) => {
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+  const skip = (page - 1) * limit;
+
+  const filter: any = {};
+  if (query.id) {
+    filter._id = query.id;
+  }
+  if (query.search) {
+    filter.name = { $regex: query.search, $options: "i" };
+  }
+  if (query.role) {
+    filter.role = query.role;
+  }
+
+  const users = await UserModel.find(filter).skip(skip).limit(limit);
+  const result = users.length;
+  const total = await UserModel.countDocuments();
+  return {
+    total,
+    result,
+    page,
+    limit,
+    users,
+  };
 };
 
 const generateJWT = (userId: string): string => {

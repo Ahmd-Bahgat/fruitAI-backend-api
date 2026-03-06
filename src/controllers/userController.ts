@@ -16,6 +16,8 @@ import {
   updateUserProfileImageService,
   forgotPasswordService,
   resetPasswordService,
+  getMeService,
+  getUsersService,
 } from "../services/userService";
 import { sendEmail } from "../services/emailService";
 
@@ -120,4 +122,26 @@ export const updateUserProfileImageController = async (
     message: "Profile image updated successfully",
     data,
   });
+};
+
+export const getMeController = async (req: Request, res: Response) => {
+  const userId = req.userId;
+  if (!userId) {
+    throw new AppError("Unauthorized", 401);
+  }
+  const user = await getMeService(userId);
+  res.status(200).json({
+    status: "success",
+    user,
+  });
+};
+
+export const getUsersController = async (req: Request, res: Response) => {
+
+  const result = await getUsersService(req.query)
+  res.status(200).json({
+    status:'success',
+    ...result
+  })
+
 };

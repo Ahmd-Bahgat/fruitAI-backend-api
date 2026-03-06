@@ -12,7 +12,6 @@ if (!fs.existsSync(uploadPath)) {
 
 export const uploadSingleImage = (filedName: string) => {
   const storage = multer.memoryStorage();
-
   const filter = (
     req: Request,
     file: Express.Multer.File,

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 
 import connectDB from "./configs/db";
 import userRoute from "./routes/userRoute";
+import classificationRoute from './routes/classificationRoute'
 import errorHandler from "./middlewares/errorHandler";
 import { notFound } from "./middlewares/notFound";
 import { connectRedis } from "./configs/redis";
@@ -20,6 +21,7 @@ app.use(express.static("uploads"));
 
 
 app.use("/api", userRoute);
+app.use('/api', classificationRoute)
 
 app.use(notFound);
 app.use(errorHandler);

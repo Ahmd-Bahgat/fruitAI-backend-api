@@ -6,6 +6,8 @@ import { uploadSingleImage } from "../middlewares/uploadMiddleware";
 
 import {
   forgotPasswordController,
+  getMeController,
+  getUsersController,
   loginController,
   registerController,
   resetPasswordController,
@@ -40,5 +42,8 @@ router.patch(
   uploadSingleImage("profileImage"),
   asyncHandler(updateUserProfileImageController),
 );
+
+router.get('/user/profile', validateJWT, asyncHandler(getMeController))
+router.get('/users', asyncHandler(getUsersController))
 
 export default router;

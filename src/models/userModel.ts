@@ -23,6 +23,7 @@ const userSchema = new Schema<IUser>(
       required: [true, "Password is required"],
       minlength: 6,
       maxlength: 225,
+      select: false,
     },
     profileImage: String,
   },
