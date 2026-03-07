@@ -37,7 +37,7 @@ export const loginService = async ({ email, password }: ILogin) => {
   if (!user) {
     throw new AppError("Incorrect email or password", 400);
   }
-  console.log(user.password);
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     throw new AppError("Incorrect email or password", 400);

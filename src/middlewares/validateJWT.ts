@@ -2,12 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AppError } from "../utils/appError";
 import jwt from "jsonwebtoken";
 
-
-const validateJWT = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const validateJWT = async (req: Request, res: Response, next: NextFunction) => {
   const authorizationHeader = req.get("authorization");
   if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
     throw new AppError("Unauthorized", 401);

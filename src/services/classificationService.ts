@@ -37,3 +37,45 @@ export const classificationService = async ({
   });
   return response;
 };
+
+interface ClassificationHistoryParams {
+  userId: string;
+  page: number;
+  limit: number;
+  skip: number;
+}
+export const classificationHistoryService = async ({
+  userId,
+  page,
+  limit,
+  skip,
+}: ClassificationHistoryParams) => {
+  const classification = await ClassificationModel.find({ user: userId })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+  const total = await ClassificationModel.countDocuments({ user: userId });
+  const count = classification.length;
+  return {
+    total,
+    count,
+    page,
+    limit,
+    data: classification,
+  };
+};
+
+export const deleteClassificationService = async (
+  classificationId: string,
+  userId: string,
+) => {
+  const classification = await ClassificationModel.findOneAndDelete({
+    _id: classificationId,
+    user: userId,
+  });
+  if(!classification){
+    throw new AppError('Classification not found', 404)
+  }
+  return classification
+};
