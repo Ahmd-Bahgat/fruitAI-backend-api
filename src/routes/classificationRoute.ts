@@ -21,6 +21,10 @@ router.get(
   validateJWT,
   asyncHandler(classificationHistoryController),
 );
-router.delete('/classification/:id', validateJWT, asyncHandler(deleteClassificationController))
+router.delete(
+  "/classification/:id",
+  validateJWT,
+  asyncHandler(deleteClassificationController),
+);
 
 export default router;

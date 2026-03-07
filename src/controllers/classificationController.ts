@@ -1,9 +1,15 @@
 import fs from "fs";
-import { Request, Response } from "express";
-import { classificationHistoryService, classificationService, deleteClassificationService } from "../services/classificationService";
-import { AppError } from "../utils/appError";
 import path from "path";
-import { json } from "zod";
+
+import { Request, Response } from "express";
+
+import getPagination from "../utils/pagination";
+import { AppError } from "../utils/appError";
+import {
+  classificationHistoryService,
+  classificationService,
+  deleteClassificationService,
+} from "../services/classificationService";
 
 const uploadPath = "uploads/fruits";
 if (!fs.existsSync(uploadPath)) {
@@ -33,7 +39,7 @@ export const classificationController = async (req: Request, res: Response) => {
   });
   res.status(200).json({
     status: "success",
-    data: result.data,
+    data: result,
   });
 };
 
@@ -41,33 +47,39 @@ export const classificationHistoryController = async (
   req: Request,
   res: Response,
 ) => {
-  const userId = req.userId
-  if(!userId){
-    throw new AppError('Unauthorized', 401)
+  const userId = req.userId;
+  if (!userId) {
+    throw new AppError("Unauthorized", 401);
   }
-  const page = Number(req.query.page) || 1
-  const limit = Number(req.query.limit )|| 10
-  const skip = (page - 1) * limit
-  const data = await classificationHistoryService({userId, page, limit, skip})
+  const {page, limit , skip} = getPagination(req.query)
+
+  const data = await classificationHistoryService({
+    userId,
+    page,
+    limit,
+    skip,
+  });
   res.status(200).json({
-    status: 'success',
-    ...data
-  })
+    status: "success",
+    ...data,
+  });
 };
 
-export const deleteClassificationController = async (req:Request, res:Response) => {
-  const userId = req.userId
-  const classificationId = req.params.id
-  if(!userId){
-    throw new AppError('Unauthorized', 401)
+export const deleteClassificationController = async (
+  req: Request,
+  res: Response,
+) => {
+  const userId = req.userId;
+  const classificationId = req.params.id;
+  if (!userId) {
+    throw new AppError("Unauthorized", 401);
   }
-  if(!classificationId){
-    throw new AppError('Classification id required', 400)
+  if (!classificationId) {
+    throw new AppError("Classification id required", 400);
   }
-  await deleteClassificationService(classificationId as string, userId)
+  await deleteClassificationService(classificationId as string, userId);
   res.status(200).json({
-    status: 'success',
-    message: 'classification deleted successfully'
-  })
-
-}
+    status: "success",
+    message: "classification deleted successfully",
+  });
+};

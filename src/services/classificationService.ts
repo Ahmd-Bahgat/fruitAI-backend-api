@@ -1,10 +1,9 @@
-import { Request, Response } from "express";
-import path from "path";
-import multer from "multer";
-import FormData from "form-data";
 import fs from "fs";
+
 import axios from "axios";
 import sharp from "sharp";
+import FormData from "form-data";
+
 import { AppError } from "../utils/appError";
 import { ClassificationModel } from "../models/classificationModel";
 
@@ -25,17 +24,21 @@ export const classificationService = async ({
   const form = new FormData();
   form.append("fruitImage", fs.createReadStream(imagePath));
 
-  const response = await axios.post(process.env.MOCK_AI_URL!, form, {
+  const { data } = await axios.post(process.env.MOCK_AI_URL!, form, {
     headers: form.getHeaders(),
+    timeout: 10000,
   });
+
+  //fs.unlinkSync(imagePath);
+
   await ClassificationModel.create({
     user: userId,
-    fruit: response.data.fruitName,
-    quality: response.data.quality,
-    confidence: response.data.confidence,
+    fruit: data.fruitName,
+    quality: data.quality,
+    confidence: data.confidence,
     image: imageName,
   });
-  return response;
+  return data;
 };
 
 interface ClassificationHistoryParams {
@@ -74,8 +77,8 @@ export const deleteClassificationService = async (
     _id: classificationId,
     user: userId,
   });
-  if(!classification){
-    throw new AppError('Classification not found', 404)
+  if (!classification) {
+    throw new AppError("Classification not found", 404);
   }
-  return classification
+  return classification;
 };

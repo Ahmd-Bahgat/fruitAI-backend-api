@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { client } from "../configs/redis";
 
+import getPagination from "../utils/pagination";
 import { UserModel } from "../models/userModel";
 import { AppError } from "../utils/appError";
 import { ILogin, IUser } from "../validations/userValidate";
@@ -147,9 +148,8 @@ export const getMeService = async (userId: string) => {
 };
 
 export const getUsersService = async (query: any) => {
-  const page = query.page || 1;
-  const limit = query.limit || 10;
-  const skip = (page - 1) * limit;
+
+  const {page, limit, skip} = getPagination(query)
 
   const filter: any = {};
   if (query.id) {
@@ -163,14 +163,14 @@ export const getUsersService = async (query: any) => {
   }
 
   const users = await UserModel.find(filter).skip(skip).limit(limit);
-  const result = users.length;
   const total = await UserModel.countDocuments();
+  const count = users.length;
   return {
     total,
-    result,
+    count,
     page,
     limit,
-    users,
+    data: users,
   };
 };
 
