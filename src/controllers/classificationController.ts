@@ -12,9 +12,11 @@ import {
 } from "../services/classificationService";
 
 const uploadPath = "uploads/fruits";
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-}
+export const createUploadPath = () => {
+  if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath, { recursive: true });
+  }
+};
 
 export const classificationController = async (req: Request, res: Response) => {
   if (!req.file) {
@@ -37,7 +39,7 @@ export const classificationController = async (req: Request, res: Response) => {
     imageName,
     userId,
   });
-  res.status(200).json({
+  res.status(201).json({
     status: "success",
     data: result,
   });
@@ -51,7 +53,7 @@ export const classificationHistoryController = async (
   if (!userId) {
     throw new AppError("Unauthorized", 401);
   }
-  const {page, limit , skip} = getPagination(req.query)
+  const { page, limit, skip } = getPagination(req.query);
 
   const data = await classificationHistoryService({
     userId,
@@ -70,14 +72,15 @@ export const deleteClassificationController = async (
   res: Response,
 ) => {
   const userId = req.userId;
-  const classificationId = req.params.id;
+  const classificationId = req.params.id.toString();
   if (!userId) {
     throw new AppError("Unauthorized", 401);
   }
   if (!classificationId) {
     throw new AppError("Classification id required", 400);
   }
-  await deleteClassificationService(classificationId as string, userId);
+  await deleteClassificationService(classificationId, userId);
+  // 204 No content
   res.status(200).json({
     status: "success",
     message: "classification deleted successfully",

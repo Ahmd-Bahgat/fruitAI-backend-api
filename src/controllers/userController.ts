@@ -46,7 +46,7 @@ export const loginController = async (req: Request, res: Response) => {
 };
 
 export const forgotPasswordController = async (req: Request, res: Response) => {
-  const IP = req.ip;
+  const IP = req.ip || req.socket.remoteAddress;
   const { email } = req.body;
   if (!email) {
     throw new AppError("Email is required", 400);
@@ -84,6 +84,9 @@ export const updateUserProfileController = async (
   res: Response,
 ) => {
   const userId = req.userId;
+  if(!userId){
+    throw new AppError('Unauthorized', 401)
+  }
   const parsed = zUserSchema.partial().safeParse(req.body);
   if (!parsed.success) {
     throw new AppError("Invalid data", 400);
@@ -107,6 +110,9 @@ export const updateUserProfileImageController = async (
   const userId = req.userId;
   if (!req.file) {
     throw new AppError("No image uploaded", 400);
+  }
+  if (!req.file.mimetype.startsWith("image/")) {
+    throw new AppError("Only image allowed", 400);
   }
   const ext = path.extname(req.file.originalname);
   const fileName = `profile-image-${req.userId}-${Date.now()}${ext}`;
@@ -137,11 +143,9 @@ export const getMeController = async (req: Request, res: Response) => {
 };
 
 export const getUsersController = async (req: Request, res: Response) => {
-
-  const result = await getUsersService(req.query)
+  const result = await getUsersService(req.query);
   res.status(200).json({
-    status:'success',
-    ...result
-  })
-
+    status: "success",
+    ...result,
+  });
 };

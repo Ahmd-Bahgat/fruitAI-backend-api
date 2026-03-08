@@ -10,8 +10,18 @@ const classificationSchema = new Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
+
+classificationSchema.virtual("imageUrl").get(function () {
+  if (!this.image) {
+    return null;
+  }
+
+  return `${process.env.BASE_URL}/fruits/${this.image}`;
+});
 
 export const ClassificationModel = mongoose.model(
   "Classification",

@@ -55,7 +55,7 @@ export const loginService = async ({ email, password }: ILogin) => {
 export const forgotPasswordService = async (email: string, IP: any) => {
   const user = await UserModel.findOne({ email });
   if (!user) {
-    throw new AppError("Email not found", 400);
+    throw new AppError("Email not found", 404);
   }
 
   const otpCode = crypto.randomInt(100000, 999999).toString();
@@ -66,8 +66,13 @@ export const forgotPasswordService = async (email: string, IP: any) => {
   return otpCode;
 };
 
+interface ResetPasswordParams {
+  email: string;
+  otpCode: string;
+  newPassword: string;
+}
 export const resetPasswordService = async (
-  { email, otpCode, newPassword }: any,
+  { email, otpCode, newPassword }: ResetPasswordParams,
   IP: any,
 ) => {
   const user = await UserModel.findOne({ email });
@@ -94,11 +99,16 @@ export const resetPasswordService = async (
   await user.save();
 };
 
+interface UpdateProfile {
+  userId: string;
+  name?: string;
+  email?: string;
+}
 export const updateUserProfileService = async ({
   userId,
   name,
   email,
-}: any) => {
+}: UpdateProfile) => {
   const updatedUser = await UserModel.findByIdAndUpdate(
     userId,
     {
@@ -148,8 +158,7 @@ export const getMeService = async (userId: string) => {
 };
 
 export const getUsersService = async (query: any) => {
-
-  const {page, limit, skip} = getPagination(query)
+  const { page, limit, skip } = getPagination(query);
 
   const filter: any = {};
   if (query.id) {
@@ -175,13 +184,18 @@ export const getUsersService = async (query: any) => {
 };
 
 const generateJWT = (userId: string): string => {
-  if (!process.env.SECRET_KEY) {
-    throw new AppError("SECRET_KEY is not defined", 500);
+  const SECRET_KEY = process.env.SECRET_KEY;
+
+  if (!SECRET_KEY) {
+    throw new AppError(
+      "SECRET_KEY is not defined in environment variables",
+      500,
+    );
   }
   if (!userId) {
     throw new AppError("payload not found", 400);
   }
-  return jwt.sign({ userId: userId }, process.env.SECRET_KEY as string, {
+  return jwt.sign({ userId: userId }, SECRET_KEY, {
     expiresIn: "7d",
   });
 };

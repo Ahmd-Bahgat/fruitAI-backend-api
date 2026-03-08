@@ -1,4 +1,6 @@
 import express from "express";
+import { param } from "express-validator";
+
 import { uploadSingleImage } from "../middlewares/uploadMiddleware";
 import asyncHandler from "../utils/asyncHandler";
 import {
@@ -23,6 +25,7 @@ router.get(
 );
 router.delete(
   "/classification/:id",
+  param("id").isMongoId().withMessage("Invalid classification id"),
   validateJWT,
   asyncHandler(deleteClassificationController),
 );

@@ -23,22 +23,25 @@ export const classificationService = async ({
 
   const form = new FormData();
   form.append("fruitImage", fs.createReadStream(imagePath));
-
-  const { data } = await axios.post(process.env.MOCK_AI_URL!, form, {
+  const AI_URL = process.env.MOCK_AI_URL;
+  if (!AI_URL) {
+    throw new AppError("AI_URL is not defined in environment variables", 500);
+  }
+  const { data } = await axios.post(AI_URL, form, {
     headers: form.getHeaders(),
     timeout: 10000,
   });
 
   //fs.unlinkSync(imagePath);
 
-  await ClassificationModel.create({
+  const classification = await ClassificationModel.create({
     user: userId,
     fruit: data.fruitName,
     quality: data.quality,
     confidence: data.confidence,
     image: imageName,
   });
-  return data;
+  return classification;
 };
 
 interface ClassificationHistoryParams {
